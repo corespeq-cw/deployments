@@ -1,0 +1,10 @@
+{
+  "ceph_pool"   : "$CW_CEPH_POOL",
+  "ceph_user"   : "$CW_CEPH_USER",
+  "ceph_enable" : "$CW_CEPH_ENABLE",
+  "psql_host"   : "postgres",
+  "psql_user"   : "wizard_clients",
+  "psql_pwd"    : "wizard_secret",
+  "psql_dbname" : "cluster_management",
+  "psql_ssl"    : "disable"
+}

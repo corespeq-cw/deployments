@@ -1,0 +1,135 @@
+services:
+  postgres:
+    image: postgres:17.5
+    container_name: cluster-wizard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+      PSQL_PORT: "5432"
+      DAYS_TO_KEEP: "60"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db-populator:
+    image: postgres:17.5
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./sql:/sql
+    environment:
+      POSTGRES_POPULATE_DB: true
+    entrypoint: >
+      sh -c 'set -e;
+      if [ "$${POSTGRES_POPULATE_DB}" = "true" ]; then
+        echo "Waiting for database to be ready..."
+        for f in $(ls /sql/*.sql | sort); do
+          if [ "$(basename $$f)" = "0.0.0-db-setup.sql" ]; then
+            PGPASSWORD="postgres_password" psql -h postgres -U postgres -v POSTGRES_CW_DBNAME=cluster_management -v POSTGRES_CW_USER=wizard_clients -v POSTGRES_CW_PASSWORD=wizard_secret -f $$f;
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
+            continue;
+          fi;
+          echo Running $$f;
+          PGPASSWORD="wizard_secret" psql -h postgres -U wizard_clients -d cluster_management -v CW_ADMIN_USER=admin -f $$f;
+          if [ $? -ne 0 ]; then
+            exit 1
+          fi
+        done;
+      else
+        echo "Skipping DB population";
+      fi'
+
+  cluster-wizard:
+    image: clusterwizard/cluster-wizard:0.4.0-beta
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-populator:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 50001 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    container_name: cluster-wizard
+    restart: unless-stopped
+    ports:
+      - "50051:50001"
+    environment:
+      CW_CEPH_POOL: ${CW_CEPH_POOL}
+      CW_CEPH_USER: ${CW_CEPH_USER}
+      CW_CEPH_ENABLE: ${CW_CEPH_ENABLE}
+    volumes:
+      - ./cw_files:/cw_files
+      - ./openssl:/openssl
+    entrypoint: ["/bin/sh", "-c", "\
+    set -e; \
+    mkdir -p /cluster_wizard; \
+    cp cw_files/* /cluster_wizard/; \
+    apt-get update; \
+    apt-get install -y gettext openssl netcat; \
+    envsubst < /cluster_wizard/env_cluster.json_conf > /cluster_wizard/env_cluster.json; \
+    cd openssl; \
+    if [ ! -d ./CA ] || [ ! -d ./server ]; then \
+      mkdir -p CA; \
+      openssl req -x509  -newkey rsa:4096 -nodes -days 3650 -keyout CA/ca_key.pem -out CA/ca_cert.pem -subj /C=US/ST=CA/L=SVL/O=gRPC/CN=cluster-wizard-server-ca/ -config ./openssl.cnf -extensions cluster_wizard_ca -sha256; \
+      openssl req -x509 -newkey rsa:4096 -nodes -days 3650 -keyout CA/client_ca_key.pem -out CA/client_ca_cert.pem -subj /C=US/ST=CA/L=SVL/O=gRPC/CN=cluster_wizard_client_ca/  -config ./openssl.cnf -extensions cluster_wizard_ca -sha256; \
+      mkdir -p server; \
+      openssl genrsa -out server/server_key.pem 4096; \
+      openssl req -new -key server/server_key.pem -out server/server_csr.pem -subj /C=US/ST=CA/L=SVL/O=gRPC/CN=cluster_wizard_server/ -config ./openssl.cnf -reqexts server; \
+      openssl x509 -req -in server/server_csr.pem -CAkey CA/ca_key.pem -CA CA/ca_cert.pem -days 3650 -set_serial 1000 -out server/server_cert.pem -extfile ./openssl.cnf -extensions server -sha256; \
+    fi; \
+    cp server/server_cert.pem /cluster_wizard; \
+    cp server/server_key.pem /cluster_wizard;  \
+    cp CA/client_ca_cert.pem /cluster_wizard; \
+    cp CA/client_ca_key.pem /cluster_wizard; \
+    cd ../; \
+    mkdir -p /credentials; \
+    openssl genrsa -out /credentials/private.key 2048; \
+    openssl rsa -in /credentials/private.key -pubout -out /credentials/public.key; \
+    openssl req -new -key /credentials/private.key -out /credentials/user.csr -subj  \"/CN=admin/emailAddress=admin@test.com\"; \
+    /cluster-wizard -sign-csr /credentials/user.csr; \
+    mv admin_cert.pem /credentials/; \
+    /cluster-wizard"]
+    command: []
+
+  wizard-client:
+    image: clusterwizard/wizard-client-webui:0.4.0-beta
+    depends_on:
+      cluster-wizard:
+        condition: service_healthy
+    container_name: wizard-client-webui
+    restart: unless-stopped
+    ports:
+      - "23051:23051"
+      - "443:25080"
+    environment:
+      BACKEND_URL: "${EXTERNAL_IP}:23051"
+      FRONTEND_URL: "${EXTERNAL_IP}"
+      CLUSTER_WIZARD_HOST: cluster-wizard
+      CLUSTER_WIZARD_PORT: 50001
+      TLS: true
+      CERT_PATH: "/app/tls.crt"
+      KEY_PATH: "/app/tls.key"
+    volumes:
+      - ./openssl:/openssl:ro
+    entrypoint: ["/bin/sh", "-c", "\
+        set -e; \
+        if [ ! -f /openssl/CA/ca_cert.pem ]; then \
+          echo \"Missing CA cert\" >&2; \
+          exit 1; \
+        fi; \
+        export CA_CERT=\"$(cat \"/openssl/CA/ca_cert.pem\")\"; \
+        openssl req -x509 -newkey rsa:2048 -nodes -sha256 -keyout /app/tls.key -out /app/tls.crt -days 3650 -subj \"/C=US/ST=CA/L=SVL/O=WEBUI/CN=${EXTERNAL_IP}/\" -addext \"subjectAltName = IP:${EXTERNAL_IP}\"; \
+        /entrypoint.sh"]
+
+
+volumes:
+  postgres_data:
