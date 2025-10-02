@@ -80,7 +80,7 @@ docker compose up -d
 
 Expected output:
 ```bash
-[+] Running 5/5
+[+] Running 6/6
  ✔ Network compose_default            Created                                                                                                    0.0s
  ✔ Volume "compose_postgres_data"     Created                                                                                                    0.0s
  ✔ Container cluster-wizard-postgres  Healthy                                                                                                   11.3s
