@@ -107,10 +107,10 @@ services:
     restart: unless-stopped
     ports:
       - "23051:23051"
-      - "443:25080"
+      - "25080:25080"
     environment:
       BACKEND_URL: "${EXTERNAL_IP}:23051"
-      FRONTEND_URL: "${EXTERNAL_IP}"
+      FRONTEND_URL: "${EXTERNAL_IP}:25080"
       CLUSTER_WIZARD_HOST: cluster-wizard
       CLUSTER_WIZARD_PORT: 50001
       TLS: true

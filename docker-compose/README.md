@@ -102,7 +102,7 @@ docker compose exec cluster-wizard cat /credentials/private.key
 You can then test that everything is working using wizard-client CLI or WebUI.
 To do that, you can:
 
-- Connect to https://EXTERNAL_IP and follow the tutorial here: https://youtu.be/VfopY8jhiQQ?si=aXI0I4WRpvSMIX6v
+- Connect to https://EXTERNAL_IP:25080 and follow the tutorial here: https://youtu.be/VfopY8jhiQQ?si=aXI0I4WRpvSMIX6v
 
 
 - Use wizard-client CLI from inside the container.
@@ -145,7 +145,7 @@ docker compose ps
 NAME                      IMAGE                                          COMMAND                  SERVICE          CREATED              STATUS                        PORTS
 cluster-wizard            clusterwizard/cluster-wizard:0.4.0-beta        "/bin/sh -c 'set -e;…"   cluster-wizard   About a minute ago   Up 52 seconds (healthy)       0.0.0.0:50051->50001/tcp, [::]:50051->50001/tcp
 cluster-wizard-postgres   postgres:17.5                                  "docker-entrypoint.s…"   postgres         About a minute ago   Up About a minute (healthy)   5432/tcp
-wizard-client-webui       clusterwizard/wizard-client-webui:0.4.0-beta   "/bin/sh -c 'set -e;…"   wizard-client    About a minute ago   Up 41 seconds                 0.0.0.0:23051->23051/tcp, [::]:23051->23051/tcp, 0.0.0.0:443->25080/tcp, [::]:443->25080/tcp
+wizard-client-webui       clusterwizard/wizard-client-webui:0.4.0-beta   "/bin/sh -c 'set -e;…"   wizard-client    About a minute ago   Up 41 seconds                 0.0.0.0:23051->23051/tcp, [::]:23051->23051/tcp, 0.0.0.0:25080->25080/tcp, [::]:25080->25080/tcp
 ```
 
 
@@ -281,9 +281,19 @@ When you are finished working with this project, you may want to remove containe
 
 
 - 🔑 **Running Podman without `sudo`**  
-  By default, you may need `sudo` to run Podman command because the user socker is not running.  
+  By default, you may need `sudo` to run Podman command because the user socket is not running.  
   ```bash
   # Enable the user socket
   systemctl --user enable --now podman.socket
   systemctl --user status podman.socket
   ```
+
+
+## 🛠️ Troubleshooting
+
+- **Login fails when `cluster-wizard` is in `/etc/hosts` with `Podman`**   
+  If you have a manual entry for `cluster-wizard` in your `/etc/hosts` file, DNS resolution will bypass Podman.
+  This causes the service name to resolve to `127.0.0.1` instead of the container’s internal IP, and login to the Web UI will fail.
+
+  ✅ **Fix:** Remove or comment out the `cluster-wizard` entry from `/etc/hosts` so that Podman/Docker’s embedded DNS can resolve the service name correctly.
+
