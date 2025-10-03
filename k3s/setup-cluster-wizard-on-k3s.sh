@@ -56,6 +56,14 @@ if ! command -v kubectl &> /dev/null; then
 fi
 echo "[INFO] kubectl found: $(command -v kubectl)"
 
+KUBECTL_BIN=$(command -v kubectl)
+if [ -L "$KUBECTL_BIN" ] && [[ "$(readlink -f "$KUBECTL_BIN")" == *"/k3s" ]]; then
+    echo "[INFO] kubectl is provided by k3s ($KUBECTL_BIN -> $(readlink -f "$KUBECTL_BIN"))"
+else
+    echo "[ERROR] kubectl is not provided by k3s."
+    exit 1
+fi
+
 # 2. Check if kubeconfig exists
 if [ ! -f ${KUBECONFIG_PATH} ]; then
     echo "[ERROR] ${KUBECONFIG_PATH} does not exist. Is k3s installed?"
@@ -254,8 +262,8 @@ sudo kubectl create namespace $CLIENT_NAMESPACE --dry-run=client -o yaml | sudo 
 echo "[INFO] Creating client-override.yaml for Wizard Client WebUI (NodePort expose)..."
 cat <<EOF > client-override.yaml
 configMap:
-  backendUrl: "cluster-wizard:30013"
-  frontendUrl: "cluster-wizard:30012"
+  backendUrl: "$CLUSTER_WIZARD_IP:30013"
+  frontendUrl: "$CLUSTER_WIZARD_IP:30012"
 
   clusterWizardHost: &clusterWizardHost "cluster-wizard"
   clusterWizardPort: "30002"
@@ -361,14 +369,14 @@ echo ""
 echo "Wizard Client WebUI:"
 echo "  http://$CLUSTER_WIZARD_IP:30012"
 echo ""
-echo "Admin credentials mounted inside WebUI pod at:"
-echo "  /app/wizard-client-creds/cert"
-echo "  /app/wizard-client-creds/private_key"
-echo "  /app/wizard-client-creds/ca_cert"
+echo "Admin credentials for Web UI or CLI:"
+echo "  sudo kubectl get secret admin-cred -n cluster-wizard -o jsonpath='{.data.private_key}' | base64 -d > admin-private.key"
+echo "  sudo kubectl get secret cluster-wizard-cert -n cluster-wizard -o jsonpath='{.data.ca\.crt}' | base64 -d > ca_cert.pem"
 echo ""
-echo "To exec into the WebUI pod and use wizard-client, run:"
+echo "To exec into the Web UI pod and use wizard-client CLI, run:"
 echo "  sudo kubectl exec -it -n wizard-client \$(sudo kubectl get pods -n wizard-client -o jsonpath='{.items[0].metadata.name}') -- /bin/bash "
 echo ""
-echo "In WebUI pod connect, run wizard-client with:"
+echo "In Web UI pod, wizard-client and admin credentials are provided, run:"
 echo "  /app/wizard-client -c hosts -cert /app/wizard-client-creds/cert -ca /app/wizard-client-creds/ca_cert -pkey /app/wizard-client-creds/private_key"
+echo ""
 echo "============================================================"
