@@ -64,6 +64,8 @@ EXTERNAL_IP=IP_OF_MY_MACHINE # IP used to access the webui
 
 Do not remove files from `cw_files`, `sql` and `openssl` folder.
 
+Docker and it's native `docker compose` installed (https://docs.docker.com/engine/install/) or Podman and it's native `podman compose` (https://podman.io/docs/installation)
+
 A license is required to use Cluster-Wizard, you need to store it under `cw_files/cluster-wizard.lic`. 
 
 If you choose to use ceph, `cw_files/ceph.conf` and `cw_files/libvirt.keyring` files are required.
@@ -88,6 +90,33 @@ Expected output:
  ✔ Container cluster-wizard           Healthy                                                                                                   22.0s
  ✔ Container wizard-client-webui      Started                                                                                                   22.2s
 ```
+
+#### 🧠 Test
+
+You can extract admin credentials using these commands:
+```bash
+docker compose exec cluster-wizard cat /credentials/admin_cert.pem
+docker compose exec cluster-wizard cat /credentials/private.key
+```
+
+You can then test that everything is working using wizard-client CLI or WebUI.
+To do that, you can:
+
+- Connect to https://EXTERNAL_IP and follow the tutorial here: https://youtu.be/VfopY8jhiQQ?si=aXI0I4WRpvSMIX6v
+
+
+- Use wizard-client CLI from inside the container.
+```bash
+docker compose exec -it wizard-client bash
+
+cd app
+cat > admin.crt # This is your admin cert from cluster-wizard service 
+cat > admin.key # This is your admin cert from cluster-wizard service 
+./wizard-client -c get-commands -cert admin.crt -pkey admin.key -ca ../openssl/CA/ca_cert.pem
+# Output
+{"Commands":["assignment-add","assignment-delete","assignment-host-add","assignment-host-delete","assignments","assignments-host","cert-create-csr","cert-gen-keys","cert-get-csr","cert-info","cert-list-csr","cert-set","cert-sign-csr","dashboard","delete-snap","delete-vminfo","domainxml-delete","domainxml-get","domainxml-list","domainxml-save","dumpxml","dumpxml-snap","get-commands","get-host-env","group-add","group-add-vm","group-delete","group-list","group-remove-vm","groups","help-admin","host-add","host-delete","host-info","host-log","host-renew-lic","hosts","host-update","list","list-allowed","list-bridge","list-disallowed","list-network-interface","list-vlan","list-vxlan","local-snapshots","register-bridge","register-vlan","register-vxlan","rollback","set-host-env","snapshots","snapshots-list","take-local-snap","take-snap","unregister-bridge","unregister-vlan","unregister-vxlan","update-vminfo","update-vminfo-all","user-add","user-delete","users","user-set","version","vm-bridge-attach","vm-bridge-detach","vm-bridge-update","vm-clone","vm-create","vm-delete","vm-destroy","vm-disable","vm-disk-attach","vm-disk-detach","vm-domain-info","vm-enable","vm-hostdev-attach","vm-hostdev-detach","vm-info","vm-list","vm-list-host","vm-migrate","vm-rename","vm-shutdown","vm-start","vm-template","vm-template-dumpxml","vm-template-list","vm-template-local-list","vncdisplay"]}
+```
+
 
 ### 📦 Volumes and certificates
 
@@ -198,35 +227,6 @@ wizard-client-webui  | .....+.+............+...+..+....+..............+.++++++++
 wizard-client-webui  | -----
 ```
 
-
-
-#### 🧠 Test
-
-You can extract admin credentials usings these commands:
-```bash
-docker compose exec cluster-wizard cat /credentials/admin_cert.pem
-docker compose exec cluster-wizard cat /credentials/private.key
-```
-
-You can then test that everything is working using wizard-client CLI or WebUI.
-To do that, you can:
-
-- Connect to https://EXTERNAL_IP and follow the tutorial here: https://youtu.be/VfopY8jhiQQ?si=aXI0I4WRpvSMIX6v
-
-
-- Use wizard-client CLI from inside the container.
-```bash
-docker compose exec -it wizard-client bash
-
-cd app
-cat > admin.crt # This is your admin cert from cluster-wizard service 
-cat > admin.key # This is your admin cert from cluster-wizard service 
-./wizard-client -c get-commands -cert admin.crt -pkey admin.key -ca ../openssl/CA/ca_cert.pem
-# Output
-{"Commands":["assignment-add","assignment-delete","assignment-host-add","assignment-host-delete","assignments","assignments-host","cert-create-csr","cert-gen-keys","cert-get-csr","cert-info","cert-list-csr","cert-set","cert-sign-csr","dashboard","delete-snap","delete-vminfo","domainxml-delete","domainxml-get","domainxml-list","domainxml-save","dumpxml","dumpxml-snap","get-commands","get-host-env","group-add","group-add-vm","group-delete","group-list","group-remove-vm","groups","help-admin","host-add","host-delete","host-info","host-log","host-renew-lic","hosts","host-update","list","list-allowed","list-bridge","list-disallowed","list-network-interface","list-vlan","list-vxlan","local-snapshots","register-bridge","register-vlan","register-vxlan","rollback","set-host-env","snapshots","snapshots-list","take-local-snap","take-snap","unregister-bridge","unregister-vlan","unregister-vxlan","update-vminfo","update-vminfo-all","user-add","user-delete","users","user-set","version","vm-bridge-attach","vm-bridge-detach","vm-bridge-update","vm-clone","vm-create","vm-delete","vm-destroy","vm-disable","vm-disk-attach","vm-disk-detach","vm-domain-info","vm-enable","vm-hostdev-attach","vm-hostdev-detach","vm-info","vm-list","vm-list-host","vm-migrate","vm-rename","vm-shutdown","vm-start","vm-template","vm-template-dumpxml","vm-template-list","vm-template-local-list","vncdisplay"]}
-```
-
-
 ### 🧹 Clean Up
 
 When you are finished working with this project, you may want to remove containers, networks and volumes to free up space on your system.
@@ -256,3 +256,34 @@ When you are finished working with this project, you may want to remove containe
   ```
 
 - You can also remove `openssl/CA` and `openssl/server` folders if you plan to deploy a new instance and want new CAs, certificates and keys.
+
+
+### 💡 Tips
+
+- 🐧 **Using Podman instead of Docker**  
+  You can run this project with [Podman](https://podman.io/) as a drop‑in replacement for Docker.  
+  Simply replace `docker` with `podman` in all commands — the syntax is the same.
+
+
+- 🔑 **Running Docker without `sudo`**  
+  By default, you may need `sudo` to access the Docker Engine.  
+  To allow your user to run Docker commands without `sudo`, add yourself to the `docker` group:
+
+  ```bash
+  # Create the docker group if it doesn't exist
+  sudo groupadd docker
+
+  # Add your user to the docker group
+  sudo usermod -aG docker $USER
+
+  # Apply the new group membership (log out and back in)
+  ```
+
+
+- 🔑 **Running Podman without `sudo`**  
+  By default, you may need `sudo` to run Podman command because the user socker is not running.  
+  ```bash
+  # Enable the user socket
+  systemctl --user enable --now podman.socket
+  systemctl --user status podman.socket
+  ```

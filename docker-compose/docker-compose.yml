@@ -2,7 +2,6 @@ services:
   postgres:
     image: postgres:17.5
     container_name: cluster-wizard-postgres
-    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: postgres_password
       PSQL_PORT: "5432"
@@ -59,7 +58,6 @@ services:
       timeout: 5s
       retries: 5
     container_name: cluster-wizard
-    restart: unless-stopped
     ports:
       - "50051:50001"
     environment:
