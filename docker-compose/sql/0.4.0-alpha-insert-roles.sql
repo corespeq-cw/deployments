@@ -1,91 +1,120 @@
+\set ON_ERROR_STOP 1
 
+ALTER TABLE host_info ADD COLUMN IF NOT EXISTS nw_license TEXT;
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'vm-rename') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('vm-rename', 'vm-rename');
-    END IF;
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conrelid = 'role_action'::regclass
+          AND conname = 'role_action_action_key'
+    ) THEN
+ALTER TABLE role_action ADD CONSTRAINT role_action_action_key UNIQUE (action);
+END IF;
+END$$;
 
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'vm-template-local-list') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('vm-template-local-list', 'vm-template-local-list');
-    END IF;
+ALTER TABLE cluster_users ADD COLUMN IF NOT EXISTS email varchar(50);
+
+CREATE TABLE IF NOT EXISTS  user_csr_info(
+                                             ID           SERIAL            NOT NULL,
+                                             username     varchar(30)       NOT NULL,
+    csr_str      TEXT       ,
+    email        varchar(50),
+    status       varchar(30),
+    reason       varchar(30),
+    inserted_ts  timestamp,
+    updated_ts   timestamp,
+    PRIMARY KEY (ID)
+    );
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'cert-sign-csr') THEN
+        INSERT INTO role_action(action, cmd) VALUES ('cert-sign-csr', 'cert-sign-csr');
+END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'cert-get-csr') THEN
+        INSERT INTO role_action(action, cmd) VALUES ('cert-get-csr', 'cert-get-csr');
+END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'cert-list-csr') THEN
+        INSERT INTO role_action(action, cmd) VALUES ('cert-list-csr', 'cert-list-csr');
+END IF;
 END $$;
 
 
 INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='vm-rename' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='vm-template-local-list' )    )
+    (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-sign-csr' )    ),
+(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-get-csr' )    ),
+(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-list-csr' )    )
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
-INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='host'), (SELECT ID from role_action WHERE action='vm-rename' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='host'), (SELECT ID from role_action WHERE action='vm-template-local-list' )    )
-ON CONFLICT (role_id, action_id) DO NOTHING;
 
-INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='poweruser' and type='host'), (SELECT ID from role_action WHERE action='vm-rename' )    ),
-(  (SELECT ID from roles WHERE name='poweruser' and type='host'), (SELECT ID from role_action WHERE action='vm-template-local-list' )    )
-ON CONFLICT (role_id, action_id) DO NOTHING;
+
+---- 7/7/2025
+
+ALTER TABLE cluster_users ADD COLUMN IF NOT EXISTS fullname varchar(50);
 
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'vm-migrate') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('vm-migrate', 'vm-migrate');
-    END IF;
+    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'host-update') THEN
+        INSERT INTO role_action(action, cmd) VALUES ('host-update', 'host-update');
+END IF;
+
+    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'host-renew-lic') THEN
+        INSERT INTO role_action(action, cmd) VALUES ('host-renew-lic', 'host-renew-lic');
+END IF;
 END $$;
 
+
+
 INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='vm-migrate' )    )
+    (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='host-update' )    ),
+(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='host-renew-lic' )    )
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
-----------
 
+CREATE TABLE IF NOT EXISTS host_deleted(
+                                           ID           SERIAL            NOT NULL,
+                                           host_name    varchar(50)       NOT NULL,
+    ip_address   varchar(50),
+    host_id      int,
+    license_info text,
+    deleted_ts   timestamp,
+    PRIMARY KEY (ID)
+    );
+
+---- 7/10/2025
+ALTER TABLE host_info ADD COLUMN IF NOT EXISTS active VARCHAR(20);
+
+UPDATE host_info SET active = 'active' WHERE COALESCE(active,'') = '';
 
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'domainxml-list') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('domainxml-list', 'domainxml-list');
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'domainxml-save') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('domainxml-save', 'domainxml-save');
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'domainxml-get') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('domainxml-get', 'domainxml-get');
-    END IF;
-
-    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'domainxml-delete') THEN
-        INSERT INTO role_action(action, cmd) VALUES ('domainxml-delete', 'domainxml-delete');
-    END IF;
+    IF NOT EXISTS (SELECT 1 FROM role_action WHERE action = 'dashboard') THEN
+        INSERT INTO role_action(action, cmd) VALUES ('dashboard', 'dashboard');
+END IF;
 END $$;
 
 
 INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='domainxml-list' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='domainxml-save' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='domainxml-get' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='domainxml-delete' )    )
+    (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='dashboard' )    )
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
-INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='host'), (SELECT ID from role_action WHERE action='domainxml-list' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='host'), (SELECT ID from role_action WHERE action='domainxml-save' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='host'), (SELECT ID from role_action WHERE action='domainxml-get' )    ),
-(  (SELECT ID from roles WHERE name='admin' and type='host'), (SELECT ID from role_action WHERE action='domainxml-delete' )    )
-ON CONFLICT (role_id, action_id) DO NOTHING;
+-- 07/15/2025
 
-INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='poweruser' and type='host'), (SELECT ID from role_action WHERE action='domainxml-list' )    ),
-(  (SELECT ID from roles WHERE name='poweruser' and type='host'), (SELECT ID from role_action WHERE action='domainxml-save' )    ),
-(  (SELECT ID from roles WHERE name='poweruser' and type='host'), (SELECT ID from role_action WHERE action='domainxml-get' )    ),
-(  (SELECT ID from roles WHERE name='poweruser' and type='host'), (SELECT ID from role_action WHERE action='domainxml-delete' )    )
-ON CONFLICT (role_id, action_id) DO NOTHING;
+DELETE FROM role_action_grant WHERE role_id = (SELECT ID from roles WHERE name='user' and type='vm') AND action_id = (SELECT ID from role_action WHERE action='domainxml-save' );
+DELETE FROM role_action_grant WHERE role_id = (SELECT ID from roles WHERE name='user' and type='vm') AND action_id = (SELECT ID from role_action WHERE action='domainxml-delete' );
 
-INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='user' and type='vm'), (SELECT ID from role_action WHERE action='domainxml-list' )    ),
-(  (SELECT ID from roles WHERE name='user' and type='vm'), (SELECT ID from role_action WHERE action='domainxml-save' )    ),
-(  (SELECT ID from roles WHERE name='user' and type='vm'), (SELECT ID from role_action WHERE action='domainxml-get' )    ),
-(  (SELECT ID from roles WHERE name='user' and type='vm'), (SELECT ID from role_action WHERE action='domainxml-delete' )    )
-ON CONFLICT (role_id, action_id) DO NOTHING;
+UPDATE role_action SET cmd = 'vm-start' WHERE cmd = 'vmstart';
+UPDATE role_action SET cmd = 'vm-shutdown' WHERE cmd = 'vmshutdown';
+UPDATE role_action SET cmd = 'vm-destroy' WHERE cmd = 'vmdestroy';
+UPDATE role_action SET cmd = 'vm-create' WHERE cmd = 'vmcreate';
+UPDATE role_action SET cmd = 'vm-delete' WHERE cmd = 'vmdelete';
+
+-- 7/17/2025
+UPDATE user_csr_info SET status = 'requested' WHERE status = 'request';
+UPDATE user_csr_info SET status = 'approved' WHERE status = 'approve';
+UPDATE user_csr_info SET status = 'rejected' WHERE status = 'reject'; 

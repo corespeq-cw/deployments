@@ -1,3 +1,4 @@
+\set ON_ERROR_STOP 1
 SET vars.cw_admin_user = :'CW_ADMIN_USER';
 
 DO $$

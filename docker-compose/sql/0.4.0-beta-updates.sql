@@ -1,14 +1,24 @@
-ALTER TABLE host_info
-    ADD COLUMN  nw_license    TEXT;
+\set ON_ERROR_STOP 1
 
-ALTER TABLE role_action ADD UNIQUE(action);
+ALTER TABLE host_info ADD COLUMN IF NOT EXISTS nw_license TEXT;
 
-ALTER TABLE cluster_users
-    ADD COLUMN  email    varchar(50);
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_constraint
+        WHERE conrelid = 'role_action'::regclass
+          AND conname = 'role_action_action_key'
+    ) THEN
+ALTER TABLE role_action ADD CONSTRAINT role_action_action_key UNIQUE (action);
+END IF;
+END$$;
+
+ALTER TABLE cluster_users ADD COLUMN IF NOT EXISTS email varchar(50);
 
 CREATE TABLE IF NOT EXISTS  user_csr_info(
-    ID           SERIAL            NOT NULL,
-    username     varchar(30)       NOT NULL,
+                                             ID           SERIAL            NOT NULL,
+                                             username     varchar(30)       NOT NULL,
     csr_str      TEXT       ,
     email        varchar(50),
     status       varchar(30),
@@ -35,7 +45,7 @@ END $$;
 
 
 INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-sign-csr' )    ),
+    (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-sign-csr' )    ),
 (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-get-csr' )    ),
 (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='cert-list-csr' )    )
 ON CONFLICT (role_id, action_id) DO NOTHING;
@@ -44,8 +54,7 @@ ON CONFLICT (role_id, action_id) DO NOTHING;
 
 ---- 7/7/2025
 
-ALTER TABLE cluster_users
-ADD COLUMN  fullname    varchar(50);
+ALTER TABLE cluster_users ADD COLUMN IF NOT EXISTS fullname varchar(50);
 
 
 DO $$
@@ -62,24 +71,23 @@ END $$;
 
 
 INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='host-update' )    ),
+    (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='host-update' )    ),
 (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='host-renew-lic' )    )
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
 
 CREATE TABLE IF NOT EXISTS host_deleted(
-    ID           SERIAL            NOT NULL,
-    host_name    varchar(50)       NOT NULL,
+                                           ID           SERIAL            NOT NULL,
+                                           host_name    varchar(50)       NOT NULL,
     ip_address   varchar(50),
     host_id      int,
     license_info text,
     deleted_ts   timestamp,
     PRIMARY KEY (ID)
-);
+    );
 
 ---- 7/10/2025
-ALTER TABLE host_info
-ADD COLUMN  active    VARCHAR(20);
+ALTER TABLE host_info ADD COLUMN IF NOT EXISTS active VARCHAR(20);
 
 UPDATE host_info SET active = 'active' WHERE COALESCE(active,'') = '';
 
@@ -92,7 +100,7 @@ END $$;
 
 
 INSERT INTO role_action_grant (role_id, action_id) VALUES
-(  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='dashboard' )    )
+    (  (SELECT ID from roles WHERE name='admin' and type='cluster'), (SELECT ID from role_action WHERE action='dashboard' )    )
 ON CONFLICT (role_id, action_id) DO NOTHING;
 
 -- 07/15/2025
