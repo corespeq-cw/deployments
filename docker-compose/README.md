@@ -55,7 +55,7 @@ cp .env.example .env
 CW_CEPH_ENABLE=true/false
 CW_CEPH_USER=user # Can be empty
 CW_CEPH_POOL=pool # Can be empty
-EXTERNAL_IP=IP_OF_MY_MACHINE # IP used to access the webui
+EXTERNAL_IP=IP_OF_MY_MACHINE # IP used to access the webui (you can use DNS too)
 ```
 
 ---

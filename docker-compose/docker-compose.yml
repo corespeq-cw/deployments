@@ -124,8 +124,12 @@ services:
           echo \"Missing CA cert\" >&2; \
           exit 1; \
         fi; \
+        case \"${EXTERNAL_IP}\" in \
+          [0-9]*.[0-9]*.[0-9]*.[0-9]*) ALT_NAME=\"IP:${EXTERNAL_IP}\" ;; \
+          *) ALT_NAME=\"DNS:${EXTERNAL_IP}\" ;; \
+        esac; \
         export CA_CERT=\"$(cat \"/openssl/CA/ca_cert.pem\")\"; \
-        openssl req -x509 -newkey rsa:2048 -nodes -sha256 -keyout /app/tls.key -out /app/tls.crt -days 3650 -subj \"/C=US/ST=CA/L=SVL/O=WEBUI/CN=${EXTERNAL_IP}/\" -addext \"subjectAltName = IP:${EXTERNAL_IP}\"; \
+        openssl req -x509 -newkey rsa:2048 -nodes -sha256 -keyout /app/tls.key -out /app/tls.crt -days 3650 -subj \"/C=US/ST=CA/L=SVL/O=WEBUI/CN=${EXTERNAL_IP}/\" -addext \"subjectAltName = $$ALT_NAME\"; \
         /entrypoint.sh"]
 
 
