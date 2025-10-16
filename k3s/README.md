@@ -54,7 +54,7 @@ After successful deployment, you can reach:
 Admin credentials for Web UI can be obtained by running:
 ```
 sudo kubectl get secret admin-cred -n cluster-wizard -o jsonpath='{.data.private_key}' | base64 -d > admin-private.key
-sudo kubectl get secret cluster-wizard-cert -n cluster-wizard -o jsonpath='{.data.ca\.crt}' | base64 -d > ca_cert.pem
+sudo kubectl get secret admin-cred -n cluster-wizard -o jsonpath='{.data.cert}' | base64 -d > admin.crt
 ```
 
 ### Using wizard-client CLI inside the Web UI pod
