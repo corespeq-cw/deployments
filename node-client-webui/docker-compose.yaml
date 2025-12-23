@@ -1,0 +1,57 @@
+services:
+  node-client-webui:
+    image: clusterwizard/node-client-webui:latest
+    container_name: node-client-webui
+    restart: unless-stopped
+    ports:
+      - "25080:25080"
+      - "23051:23051"
+    environment:
+      USERNAME: "${WEBUI_USERNAME}"
+      PASSWORD: "${WEBUI_PASSWORD}"
+      EXTERNAL_IP: "${EXTERNAL_IP}"
+      BACKEND_URL: "${EXTERNAL_IP}:23051"
+      FRONTEND_URL: "${EXTERNAL_IP}:25080"
+
+      # ---- TLS configuration ----
+      TLS: "true"
+      CERT_PATH: "/openssl/tls.crt"
+      KEY_PATH: "/openssl/tls.key"
+
+    # Persist generated certs
+    volumes:
+      - ./openssl:/openssl
+      - ./data:/data
+
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+          set -e
+
+          if [ -z "$$EXTERNAL_IP" ]; then
+            echo "EXTERNAL_IP is required but not set" >&2
+            exit 1
+          fi
+
+          if [ ! -f /openssl/tls.crt ] || [ ! -f /openssl/tls.key ]; then
+            echo "Generating self-signed TLS cert/key for $$EXTERNAL_IP ..."
+
+            if echo "$$EXTERNAL_IP" | grep -Eq '^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])$$'; then
+              ALT_NAME="IP:$$EXTERNAL_IP"
+            else
+              ALT_NAME="DNS:$$EXTERNAL_IP"
+            fi
+
+            openssl req -x509 -newkey rsa:2048 -nodes -sha256 \
+              -keyout /openssl/tls.key -out /openssl/tls.crt -days 3650 \
+              -subj "/C=US/ST=CA/L=SVL/O=WEBUI/CN=$$EXTERNAL_IP/" \
+              -addext "subjectAltName = $$ALT_NAME"
+
+            chmod 600 /openssl/tls.key
+            chmod 644 /openssl/tls.crt
+          else
+            echo "TLS cert/key already exist; reusing."
+          fi
+
+          exec /entrypoint.sh
