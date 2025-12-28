@@ -1,13 +1,26 @@
 # Single Node Basic
-In this tutorial, we will install Node Wizard and Node Client on a single host.
-Then we create a Ubuntu24 VM using Node Wizard.
+In this example, we will install Node Wizard and Node Client on a single host.
+Then we will create a Ubuntu24 VM using Node Wizard.
 
 
 ## Overview
-Explain the purpose of the VM setup - what services/applications will run on it, and why you chose this hosting approach.
+In this tutorial, we show the following tasks in their simplest form.
+1. How to install Node Wizard and Node Client
+2. How to register a Node Wizard host to Node Client and obtain a license for Node Wizard
+3. How to create a Ubuntu 24.04 VM (Virtual machine)
 
 ## Prerequisites
-
+* A Linux server of AMD64 architecture with one of the following OSes
+    * Ubuntu 24.04, Ubuntu 22.04 and Ubuntu 20.04
+    * RedHat Enterprise Linux 9
+    * Rockey Linux 9
+    * SLES 15
+* jq package is installed
+* Hareware Resources: We will create a VM of 4 cores with 8G memory. You may reduce hardware resource by editing VM json file.
+    * 8+ HT cores
+    * 16G memory
+* Network Resource
+    * A Network bridge with Internet connection (Preferred name is br0External)
 
 ## Deployment Steps
 
