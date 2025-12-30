@@ -1,0 +1,13 @@
+{
+    "vm_mem"     : "8",
+    "vm_core"    : "4",
+    "vm_img_size": "64",
+    "os_variant" : "ubuntu24.04",
+    "vm_img_type": "local",
+    "localpath"  : "/storage/VM/images",
+    "fstype"     : "ext4",
+    "ipaddr"     : "dhcp",
+    "username"   : "admin",
+    "passwd"     : "$y$j9T$sEOrmAk53zVY9ImWz3Vc41$mK41EWMWYfAhrUjUwb/3gnRH/086obwhph1QWER/Dl1"
+}
+
