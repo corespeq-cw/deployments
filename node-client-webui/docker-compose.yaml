@@ -21,7 +21,7 @@ services:
     # Persist generated certs
     volumes:
       - ./openssl:/openssl
-      - ./data:/data
+      - ./data:/home/nonrootuser/.node-client
 
     entrypoint:
       - /bin/sh
@@ -54,4 +54,4 @@ services:
             echo "TLS cert/key already exist; reusing."
           fi
 
-          exec /entrypoint.sh
+          /entrypoint.sh
