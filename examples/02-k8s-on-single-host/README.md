@@ -55,7 +55,9 @@
     * K8S_WORKER01_STORAGE: 128
     * K8S_WORKER02_STORAGE: 128
     * ADDITIONAL_DISK_STORAGE: 128
-3. Generate configuration files for VM creation
+3. Source set_env.sh
+    * ```source set_env.sh```
+4. Generate configuration files for VM creation
     * ```bash generate-config.sh```
     * Four files will be generated
        * k8s-master1.json
@@ -67,9 +69,9 @@
 1. Add the Node Wizard node to Node Client
    * Obtain token on KVM_HOST
       * ```sudo /root/bin/node_wizard/node-wizard --token```
-   * Add the host
+   * Add the host (on the Node Client node)
       * ```node-client -c register-server -S $KVM_HOST_IP $ --token [token]```
-2. Obtain a Node Wizard license
+2. Obtain a Node Wizard license (on the Node Client node)
    * Request licenses
       * ```node-client -c request-license```
       * TUI or GUI page will be displayed.
@@ -105,15 +107,21 @@
    node-client -S $KVM_HOST_IP -c vm-disk-attach -v k8s-worker2 -target vdb -f k8s-worker-data-disk.json
    ```
 3. Start all the VMs
-   1. Start all the VMs using Node Wizard
+   1. Start all the VMs using Node Client
    ```bash
    node-client -S $KVM_HOST_IP -c vm-start -v k8s-master1
    node-client -S $KVM_HOST_IP -c vm-start -v k8s-worker1
    node-client -S $KVM_HOST_IP -c vm-start -v k8s-worker2
    ```
-   2. Check disks using Node Wizard. Please note that the disk information is available from guest agent while the VMs are running
+   2. Check disks using Node Client. Please note that the disk information is available from guest agent while the VMs are running
    ```bash
    node-client -S $KVM_HOST_IP -c vm-domain-info -v k8s-worker1 -key disk
    node-client -S $KVM_HOST_IP -c vm-domain-info -v k8s-worker2 -key disk
    ```
 
+## Usage
+As the overview is indicated, this VM configuration is intended for deploying a small Kubernetes cluster.
+* The number of VMs can be easily modified for different sizes of Kubernetes
+* Additonial disks are used for storage provisioners like Longhorn
+   * The intended deployment is described in [Longhorn: Kubernetes native block storage](https://blog.devgenius.io/longhorn-kubernetes-native-block-storage-d879bb2735a9)
+* With VM snapshot/rollback capabilities, Kubernetes can easily re-deployed 
