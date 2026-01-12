@@ -11,7 +11,7 @@
 * To have VMs with decent resources, we expect a AMD64 architecture node with the following hardware resource
    * 20+ HT cores
    * 40+ GiB memory
-   * 1TiB disk storage
+   * 1+ TiB disk storage
 *  Linux OSes
    * Ubuntu 24.04, Ubuntu 22.04 and Ubuntu 20.04
    * RedHat Enterprise Linux 9
