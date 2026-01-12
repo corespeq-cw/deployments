@@ -70,7 +70,7 @@
    * Obtain token on KVM_HOST
       * ```sudo /root/bin/node_wizard/node-wizard --token```
    * Add the host (on the Node Client node)
-      * ```node-client -c register-server -S $KVM_HOST_IP $ --token [token]```
+      * ```node-client -c register-server -S $KVM_HOST_IP --token [token]```
 2. Obtain a Node Wizard license (on the Node Client node)
    * Request licenses
       * ```node-client -c request-license```
