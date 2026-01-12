@@ -82,7 +82,18 @@
       * ```node-client -c list-license```
 
 ### 4. Create VMs
-1. Create three VMs
+1. Add VM OS iso file(s) to Node Wizard
+    * Find ISO files
+        * Supported OSes
+            * ```node-client -c iso-list -S $KVM_HOST_IP```
+    * Add them to Node Wizard, e.g.
+        * Ubuntu24.04:
+            * ```node-client -S $KVM_HOST_IP -c iso-download -url https://old-releases.ubuntu.com/releases/24.04/ubuntu-24.04.1-live-server-amd64.iso```
+        * Ubuntu22.04:
+            * ```node-client -S $KVM_HOST_IP -c iso-download -url https://old-releases.ubuntu.com/releases/22.04/ubuntu-22.04.2-live-server-amd64.iso```
+    * Check ISO files:
+        * ```node-client -c iso-list -S $KVM_HOST_IP```
+2. Create three VMs
    * Run vm-create commands
       ```bash
       node-client -S $KVM_HOST_IP -c vm-create -v k8s-master1 -f k8s-master1.json
@@ -124,4 +135,17 @@ As the overview is indicated, this VM configuration is intended for deploying a 
 * The number of VMs can be easily modified for different sizes of Kubernetes
 * Additonial disks are used for storage provisioners like Longhorn
    * The intended deployment is described in [Longhorn: Kubernetes native block storage](https://blog.devgenius.io/longhorn-kubernetes-native-block-storage-d879bb2735a9)
-* With VM snapshot/rollback capabilities, Kubernetes can easily re-deployed 
+* With VM snapshot/rollback capabilities, Kubernetes can easily re-deployed
+
+Node Wizard enables a life-cycle management of VMs.
+* Create/Delete VMs
+* Start/Shutdown/Destory VMs
+* Attach/Detach bridges/disks/PCI devices
+* Take snapshots and rollback to snapshots
+* For the full list of features, run the help command
+   * ```node-client -h```
+
+## Troubleshooting
+* For Ubuntu VMs, we need Ubuntu repository to install qemu-guest packages. We have a few occations the the official repo timed out. You may delete the VM and recreate it.
+* If auto-installation fails, you may use VNC access to debug.
+
