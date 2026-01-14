@@ -1,0 +1,21 @@
+#!/bin/bash
+
+export KVM_HOST_IP=""                # example: 192.168.1.101
+
+export K8S_MASTER01_IP_PREFIX=""     # example: 192.168.1.129/24
+export K8S_WORKER01_IP_PREFIX=""     # example: 192.168.1.130/24
+export K8S_WORKER02_IP_PREFIX=""     # example: 192.168.1.131/24
+
+export K8S_MASTER01_CORES="4"
+export K8S_WORKER01_CORES="6"
+export K8S_WORKER02_CORES="6"
+
+export K8S_MASTER01_MEMORY="8"
+export K8S_WORKER01_MEMORY="12"
+export K8S_WORKER02_MEMORY="12"
+
+export K8S_MASTER01_STORAGE="128"
+export K8S_WORKER01_STORAGE="128"
+export K8S_WORKER02_STORAGE="128"
+
+export ADDITIONAL_DISK_STORAGE="128"
