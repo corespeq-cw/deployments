@@ -40,7 +40,7 @@
 
 ### 2. Configuring Environmental Variables
 1. Copy set_env.sh.example to set_env.sh
-2. Edit set_sen.sh for updating these variables if necessary
+2. Edit set_env.sh for updating these variables if necessary
     * KVM_HOST_IP: no default (e.g. 192.168.1.100)
     * K8S_MASTER01_IP_PREFIX : no default (e.g. 192.168.1.101/24)
     * K8S_WORKER01_IP_PREFIX : no default (e.g. 192.168.1.102/24)
@@ -146,6 +146,6 @@ Node Wizard enables a life-cycle management of VMs.
    * ```node-client -h```
 
 ## Troubleshooting
-* For Ubuntu VMs, we need Ubuntu repository to install qemu-guest packages. We have a few occations the the official repo timed out. You may delete the VM and recreate it.
+* For Ubuntu VMs, we need Ubuntu repository to install qemu-guest packages. We have a few occasions that the official repo timed out. You may delete the VM and recreate it.
 * If auto-installation fails, you may use VNC access to debug.
 
