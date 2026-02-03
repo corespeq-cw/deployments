@@ -157,7 +157,7 @@ curl -f -H "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v4/projects/57050576/
 if [ "$PROJECT" = "wizard-client" ]; then
   tar -xf "/tmp/$PROJECT.tgz" -C /tmp
   sudo mkdir -p /usr/local/bin
-  sudo cp wizard-client /usr/local/bin/
+  sudo cp /tmp/wizard-client /usr/local/bin/
 else
   extracted_dir=$(tar -tf "/tmp/$PROJECT.tgz" | head -1 | cut -d/ -f1)
   tar -xf "/tmp/$PROJECT.tgz" -C /tmp
