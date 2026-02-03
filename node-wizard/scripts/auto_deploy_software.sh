@@ -3,12 +3,42 @@
 set -e 
 
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <node-client|node-wizard> [version]"
+    echo "Usage: $0 <node-client|wizard-client|node-wizard> [version] [-s]"
+    echo "            -s is to skip checking dependencies and installing packages (only for node-client/node-wizard version >= 0.5.1)"
     exit 1
 fi
 
-case "$1" in
+PROJECT=$1
+shift
+
+PROJECT_VERSION=""
+S_OPTION=false
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -s)
+            S_OPTION=true
+            ;;
+        *)
+            if [[ -z "$PROJECT_VERSION" ]]; then
+                PROJECT_VERSION="$1"
+            else
+                echo "Unexpected argument: $1"
+                exit 1
+            fi
+            ;;
+    esac
+    shift
+done
+
+case "$PROJECT" in
     node-client)
+        ;;
+    wizard-client)
+        if [[ "$S_OPTION" == true ]]; then
+              echo "-s is not compatible with wizard-client"
+              exit 1
+        fi
         ;;
     node-wizard)
         ;;
@@ -24,7 +54,7 @@ ARCH=$(uname -m)
 DOWNLOAD=""
 
 if [ "$OS" = "Darwin" ]; then
-    if [ "$1" != "node-wizard" ]; then
+    if [ "$PROJECT" != "node-wizard" ]; then
         case "$ARCH" in
             arm64)  DOWNLOAD="macOS-arm64" ;;
             x86_64) DOWNLOAD="macOS-amd64" ;;
@@ -63,14 +93,12 @@ else
     exit 1
 fi
 
-if [ $# -ge 2 ]; then
-    VERSION=$2
-else
-    VERSION="latest"
+if [ -z "$PROJECT_VERSION" ]; then
+    PROJECT_VERSION="latest"
 fi
 
 
-echo "You are going to download $1 $VERSION for $DOWNLOAD" 
+echo "You are going to download $PROJECT $PROJECT_VERSION for $DOWNLOAD"
 echo "Do you want to continue? (y/n)"
 read -r answer
 
@@ -85,7 +113,7 @@ fi
 
 
 file=""
-if [ "$1" != "node-wizard" ]; then
+if [ "$PROJECT" != "node-wizard" ]; then
   file="https://gitlab.com/cluster-wizard/release/-/wikis/License/Node-Wizard/AUTHORIZED-CLIENT-USER-TERMS-OF-USE-(CLIENT)"
 else
   file="https://gitlab.com/cluster-wizard/release/-/wikis/License/Node-Wizard/Software-License-Agreement"
@@ -123,16 +151,26 @@ DOWNLOADJS=$(curl -s "$JSURL" | grep -oE 'Download-[^"]+\.js' | head -n1)
 
 TOKEN=$(curl -s https://cluster-wizard.gitlab.io/release/assets/$DOWNLOADJS | grep -oE 'glpat-[^"]*')
 
-curl -f -H "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v4/projects/57050576/packages/generic/$1/$VERSION/$1-$VERSION-$DOWNLOAD.tgz" -s -o "/tmp/$1.tgz" || { echo "Package not found, please verify version and os"; exit 4; }
+curl -f -H "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v4/projects/57050576/packages/generic/$PROJECT/$PROJECT_VERSION/$PROJECT-$PROJECT_VERSION-$DOWNLOAD.tgz" -s -o "/tmp/$PROJECT.tgz" || { echo "Package not found, please verify version and os"; exit 4; }
 
-extracted_dir=$(tar -tf "/tmp/$1.tgz" | head -1 | cut -d/ -f1)
-tar -xf "/tmp/$1.tgz" -C /tmp
 
-cd /tmp/$extracted_dir
-if [[ $DOWNLOAD == *mac* ]]; then
+if [ "$PROJECT" = "wizard-client" ]; then
+  tar -xf "/tmp/$PROJECT.tgz" -C /tmp
   sudo mkdir -p /usr/local/bin
-  sudo cp node-* /usr/local/bin/
+  sudo cp wizard-client /usr/local/bin/
 else
-  sudo ./deploy-*.sh -d
-fi
+  extracted_dir=$(tar -tf "/tmp/$PROJECT.tgz" | head -1 | cut -d/ -f1)
+  tar -xf "/tmp/$PROJECT.tgz" -C /tmp
 
+  cd /tmp/$extracted_dir
+  if [[ $DOWNLOAD == *mac* ]]; then
+    sudo mkdir -p /usr/local/bin
+    sudo cp node-* /usr/local/bin/
+  else
+    if [[ "$S_OPTION" == true ]]; then
+        sudo ./deploy-*.sh -ds
+    else
+        sudo ./deploy-*.sh -d
+    fi
+  fi
+fi
