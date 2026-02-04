@@ -121,7 +121,7 @@ docker compose ps
 NAME                      IMAGE                                          COMMAND                  SERVICE          CREATED              STATUS                        PORTS
 docker ps
 CONTAINER ID   IMAGE                                    COMMAND                   CREATED       STATUS       PORTS                                                                                          NAMES
-1dca19ad10ad   clusterwizard/node-client-webui:latest   "/bin/sh -c 'set -e\n…"   2 hours ago   Up 2 hours   0.0.0.0:23051->23051/tcp, :::23051->23051/tcp, 0.0.0.0:25080->25080/tcp, :::25080->25080/tcp   node-client-webui
+f9196038fcb9   clusterwizard/node-client-webui:0.5.0    "/bin/sh -c 'set -e\n…"   2 hours ago   Up 2 hours   0.0.0.0:23051->23051/tcp, :::23051->23051/tcp, 0.0.0.0:25080->25080/tcp, :::25080->25080/tcp   node-client-webui
 ```
 
 

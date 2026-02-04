@@ -46,6 +46,8 @@ See [Cluster Wizard Deployment](https://cluster-wizard.com/docs/installation/clu
 
 Problems? See [Cluster Wizard Troubleshooting](https://cluster-wizard.com/docs/installation/cluster-wizard-deployment#troubleshooting) for troubleshooting steps.
 
+After installation, deployment settings can be customized by modifying Helm values and applying them with helm upgrade. See the [Cluster Wizard Deployment](https://cluster-wizard.com/docs/installation/cluster-wizard-deployment#cluster-wizard-helm-values) guide for supported options.
+
 ## Accessing Cluster Wizard
 After successful deployment, you can reach:
  - **Cluster Wizard** API: `https://<node-ip>:30002`

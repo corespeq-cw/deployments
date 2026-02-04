@@ -1,6 +1,6 @@
 services:
   node-client-webui:
-    image: clusterwizard/node-client-webui:latest
+    image: clusterwizard/node-client-webui:0.5.0
     container_name: node-client-webui
     restart: unless-stopped
     ports:
