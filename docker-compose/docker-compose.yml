@@ -36,7 +36,7 @@ services:
             continue;
           fi;
           echo Running $$f;
-          PGPASSWORD="wizard_secret" psql -h postgres -U wizard_clients -d cluster_management -v CW_ADMIN_USER=admin -f $$f;
+          PGPASSWORD="wizard_secret" psql -h postgres -U wizard_clients -d cluster_management -v CW_ADMIN_USER=admin -v CW_ADMIN_PASSWORD=\$$2y\$$12\$$gkHzWmKsg1UlzHplSq4NmuWvgckRRPhxe8yqzLg27MEbLfnyvjz2S -f $$f;
           if [ $? -ne 0 ]; then
             exit 1
           fi
@@ -46,14 +46,14 @@ services:
       fi'
 
   cluster-wizard:
-    image: clusterwizard/cluster-wizard:0.4.0-beta
+    image: clusterwizard/cluster-wizard:0.5.0
     depends_on:
       postgres:
         condition: service_healthy
       db-populator:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 50001 || exit 1"]
+      test: ["CMD-SHELL", "./cluster-wizard -check-health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -64,6 +64,14 @@ services:
       CW_CEPH_POOL: ${CW_CEPH_POOL}
       CW_CEPH_USER: ${CW_CEPH_USER}
       CW_CEPH_ENABLE: ${CW_CEPH_ENABLE}
+      CW_SMTP_ENABLE: ${CW_SMTP_ENABLE}
+      CW_SMTP_HOST: ${CW_SMTP_HOST}
+      CW_SMTP_PORT: ${CW_SMTP_PORT}
+      CW_SMTP_USER: ${CW_SMTP_USER}
+      CW_SMTP_PWD: ${CW_SMTP_PWD}
+      CW_SMTP_FROM_NAME: ${CW_SMTP_FROM_NAME}
+      CW_SMTP_FROM_EMAIL: ${CW_SMTP_FROM_EMAIL}
+      CW_SMTP_REPLY_TO: ${CW_SMTP_REPLY_TO}
     volumes:
       - ./cw_files:/cw_files
       - ./openssl:/openssl
@@ -72,8 +80,9 @@ services:
     mkdir -p /cluster_wizard; \
     cp cw_files/* /cluster_wizard/; \
     apt-get update; \
-    apt-get install -y gettext openssl netcat; \
+    apt-get install -y gettext openssl; \
     envsubst < /cluster_wizard/env_cluster.json_conf > /cluster_wizard/env_cluster.json; \
+    envsubst < /cluster_wizard/env_smtp.json_conf > /cluster_wizard/env_smtp.json; \
     cd openssl; \
     if [ ! -d ./CA ] || [ ! -d ./server ]; then \
       mkdir -p CA; \
@@ -99,7 +108,7 @@ services:
     command: []
 
   wizard-client:
-    image: clusterwizard/wizard-client-webui:0.4.0-beta
+    image: clusterwizard/wizard-client-webui:0.5.0
     depends_on:
       cluster-wizard:
         condition: service_healthy

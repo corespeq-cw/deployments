@@ -1,0 +1,9 @@
+{
+  "smtp_host": "$CW_SMTP_HOST",
+  "smtp_port": "$CW_SMTP_PORT",
+  "smtp_user": "$CW_SMTP_USER",
+  "smtp_pwd" : "$CW_SMTP_PWD",
+  "smtp_from_name": "$CW_SMTP_FROM_NAME",
+  "smtp_from_email": "$CW_SMTP_FROM_EMAIL",
+  "smtp_reply_to": "$CW_SMTP_REPLY_TO"
+}

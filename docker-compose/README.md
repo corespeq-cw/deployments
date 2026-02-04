@@ -143,9 +143,9 @@ Expected output of ps (to verify that 3 containers are up):
 docker compose ps
 
 NAME                      IMAGE                                          COMMAND                  SERVICE          CREATED              STATUS                        PORTS
-cluster-wizard            clusterwizard/cluster-wizard:0.4.0-beta        "/bin/sh -c 'set -e;…"   cluster-wizard   About a minute ago   Up 52 seconds (healthy)       0.0.0.0:50051->50001/tcp, [::]:50051->50001/tcp
+cluster-wizard            clusterwizard/cluster-wizard:0.5.0        "/bin/sh -c 'set -e;…"   cluster-wizard   About a minute ago   Up 52 seconds (healthy)       0.0.0.0:50051->50001/tcp, [::]:50051->50001/tcp
 cluster-wizard-postgres   postgres:17.5                                  "docker-entrypoint.s…"   postgres         About a minute ago   Up About a minute (healthy)   5432/tcp
-wizard-client-webui       clusterwizard/wizard-client-webui:0.4.0-beta   "/bin/sh -c 'set -e;…"   wizard-client    About a minute ago   Up 41 seconds                 0.0.0.0:23051->23051/tcp, [::]:23051->23051/tcp, 0.0.0.0:25080->25080/tcp, [::]:25080->25080/tcp
+wizard-client-webui       clusterwizard/wizard-client-webui:0.5.0   "/bin/sh -c 'set -e;…"   wizard-client    About a minute ago   Up 41 seconds                 0.0.0.0:23051->23051/tcp, [::]:23051->23051/tcp, 0.0.0.0:25080->25080/tcp, [::]:25080->25080/tcp
 ```
 
 
@@ -168,31 +168,45 @@ Expected logs for db-populator:
 docker compose logs db-populator
 
 ...
-db-populator-1  | Running /sql/0.4.0-beta-updates.sql
-db-populator-1  | ALTER TABLE
-db-populator-1  | ALTER TABLE
-db-populator-1  | ALTER TABLE
-db-populator-1  | CREATE TABLE
-db-populator-1  | DO
-db-populator-1  | INSERT 0 3
-db-populator-1  | ALTER TABLE
-db-populator-1  | DO
+db-populator-1  | Running /sql/0.5.0-updates.sql
 db-populator-1  | INSERT 0 2
-db-populator-1  | CREATE TABLE
-db-populator-1  | ALTER TABLE
-db-populator-1  | UPDATE 0
+db-populator-1  | INSERT 0 2
 db-populator-1  | DO
 db-populator-1  | INSERT 0 1
-db-populator-1  | DELETE 1
-db-populator-1  | DELETE 1
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | INSERT 0 2
+db-populator-1  | INSERT 0 2
+db-populator-1  | DO
+db-populator-1  | INSERT 0 35
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | INSERT 0 7
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | ALTER TABLE
 db-populator-1  | UPDATE 1
+db-populator-1  | DO
+db-populator-1  | INSERT 0 1
+db-populator-1  | INSERT 0 1
+db-populator-1  | INSERT 0 1
+db-populator-1  | INSERT 0 1
+db-populator-1  | CREATE TABLE
+db-populator-1  | DO
+db-populator-1  | DO
+db-populator-1  | INSERT 0 2
+db-populator-1  | SET
+db-populator-1  | SET
 db-populator-1  | UPDATE 1
-db-populator-1  | UPDATE 1
-db-populator-1  | UPDATE 1
-db-populator-1  | UPDATE 1
-db-populator-1  | UPDATE 0
-db-populator-1  | UPDATE 0
-db-populator-1  | UPDATE 0
+db-populator-1  | INSERT 0 1
+db-populator-1  | INSERT 0 1
 ```
 
 
@@ -207,7 +221,7 @@ cluster-wizard  | 2025/10/02 17:02:47 get current time from time server
 cluster-wizard  | Signed certificate written to: admin_cert.pem
 cluster-wizard  | 2025/10/02 17:02:47 START of check license
 cluster-wizard  | 2025/10/02 17:02:47 get current time from time server
-cluster-wizard  | 2025/10/02 17:02:47 Starting cluster-wizard ... : 0.4.0-beta
+cluster-wizard  | 2025/10/02 17:02:47 Starting cluster-wizard ... : 0.5.0
 cluster-wizard  | 2025/10/02 17:02:47 CEPH_USER: CEPH_POOL: CEPH_ENABLE:false host:postgres
 cluster-wizard  | 2025/10/02 17:02:47 START of check ceph status
 cluster-wizard  | 2025/10/02 17:02:47 CEPH disabled
