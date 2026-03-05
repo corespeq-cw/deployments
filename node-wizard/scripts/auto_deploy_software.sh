@@ -2,14 +2,26 @@
 
 set -e 
 
+help() {
+  echo "Usage: $0 <node-client|wizard-client|node-wizard> [version] [-s]"
+  echo "            -s is to skip checking dependencies and installing packages (only for node-client/node-wizard version >= 0.5.1)"
+}
+
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <node-client|wizard-client|node-wizard> [version] [-s]"
-    echo "            -s is to skip checking dependencies and installing packages (only for node-client/node-wizard version >= 0.5.1)"
-    exit 1
+  help
+  exit 1
 fi
 
-PROJECT=$1
-shift
+case "$1" in
+    -h)
+        help
+        exit 0
+        ;;
+    *)
+        PROJECT=$1
+        shift
+        ;;
+esac
 
 PROJECT_VERSION=""
 S_OPTION=false
@@ -18,6 +30,10 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -s)
             S_OPTION=true
+            ;;
+        -*)
+            echo "Unknown Option"
+            exit 2
             ;;
         *)
             if [[ -z "$PROJECT_VERSION" ]]; then
@@ -43,7 +59,7 @@ case "$PROJECT" in
     node-wizard)
         ;;
     *)
-        echo "Unknow software"
+        echo "Unknown software"
         exit 2
         ;;
 esac
