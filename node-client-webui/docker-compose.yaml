@@ -1,17 +1,20 @@
 services:
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: guacd_service
+    restart: always
+
   node-client-webui:
-    image: clusterwizard/node-client-webui:0.5.0
+    image: clusterwizard/node-client-webui:0.6.0
     container_name: node-client-webui
     restart: unless-stopped
     ports:
       - "25080:25080"
-      - "23051:23051"
     environment:
       USERNAME: "${WEBUI_USERNAME}"
       PASSWORD: "${WEBUI_PASSWORD}"
       EXTERNAL_IP: "${EXTERNAL_IP}"
-      BACKEND_URL: "${EXTERNAL_IP}:23051"
-      FRONTEND_URL: "${EXTERNAL_IP}:25080"
+      GUACAMOLE_IP: guacd
 
       # ---- TLS configuration ----
       TLS: "true"

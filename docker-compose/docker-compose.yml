@@ -46,7 +46,7 @@ services:
       fi'
 
   cluster-wizard:
-    image: clusterwizard/cluster-wizard:0.5.0
+    image: clusterwizard/cluster-wizard:0.6.0
     depends_on:
       postgres:
         condition: service_healthy
@@ -108,18 +108,15 @@ services:
     command: []
 
   wizard-client:
-    image: clusterwizard/wizard-client-webui:0.5.1
+    image: clusterwizard/wizard-client-webui:0.6.0
     depends_on:
       cluster-wizard:
         condition: service_healthy
     container_name: wizard-client-webui
     restart: unless-stopped
     ports:
-      - "23051:23051"
       - "25080:25080"
     environment:
-      BACKEND_URL: "${EXTERNAL_IP}:23051"
-      FRONTEND_URL: "${EXTERNAL_IP}:25080"
       CLUSTER_WIZARD_HOST: cluster-wizard
       CLUSTER_WIZARD_PORT: 50001
       TLS: true

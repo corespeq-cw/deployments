@@ -38,8 +38,8 @@ esac
 LICENSE_FILE="$1"
 NAMESPACE="cluster-wizard"
 CLIENT_NAMESPACE="wizard-client"
-HELM_CHART_VERSION="0.2.0"
-WIZARD_CLIENT_HELM_CHART_VERSION="0.2.1"
+HELM_CHART_VERSION="0.3.0"
+WIZARD_CLIENT_HELM_CHART_VERSION="0.3.0"
 KUBECONFIG_PATH="/etc/rancher/k3s/k3s.yaml"
 
 
@@ -262,9 +262,6 @@ sudo kubectl create namespace $CLIENT_NAMESPACE --dry-run=client -o yaml | sudo 
 echo "[INFO] Creating client-override.yaml for Wizard Client WebUI (NodePort expose)..."
 cat <<EOF > client-override.yaml
 configMap:
-  backendUrl: "$CLUSTER_WIZARD_IP:30013"
-  frontendUrl: "$CLUSTER_WIZARD_IP:30012"
-
   clusterWizardHost: &clusterWizardHost "cluster-wizard"
   clusterWizardPort: "30002"
 
@@ -284,9 +281,6 @@ expose:
       front:
         port: 25080
         nodePort: 30012
-      back:
-        port: 23051
-        nodePort: 30013
 EOF
 
 echo "[INFO] Deploying Wizard Client WebUI via Helm..."

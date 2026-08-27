@@ -186,16 +186,3 @@ When you are finished, you may remove containers, networks, and volumes.
   systemctl --user enable --now podman.socket
   systemctl --user status podman.socket
   ```
-
-## 🛠️ Troubleshooting
-
-- **Login fails with "Network Error".**
-  The default deployment uses **self-signed certificates**.
-  Both the backend and frontend certificate must be trusted by the browser.
-
-  ✅ **Fix:**
-  Open the backend URL once and accept the certificate:
-  ```
-  https://EXTERNAL_IP:23051
-  ```
-  Then reload the frontend and try logging in again.
