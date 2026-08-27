@@ -156,7 +156,7 @@ else
     exit 3
 fi
 
-curl -f -H "PRIVATE-TOKEN: $TOKEN" "https://download.cluster-wizard.com/files/$PROJECT/$PROJECT_VERSION/$PROJECT-$PROJECT_VERSION-$DOWNLOAD.tgz" -s -o "/tmp/$PROJECT.tgz" || { echo "Package not found, please verify version and os"; exit 4; }
+curl -f "https://download.cluster-wizard.com/files/$PROJECT/$PROJECT_VERSION/$PROJECT-$PROJECT_VERSION-$DOWNLOAD.tgz" -s -o "/tmp/$PROJECT.tgz" || { echo "Package not found, please verify version and os"; exit 4; }
 
 if [ "$PROJECT" = "wizard-client" ]; then
   tar -xf "/tmp/$PROJECT.tgz" -C /tmp
