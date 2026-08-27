@@ -72,9 +72,9 @@ DOWNLOAD=""
 if [ "$OS" = "Darwin" ]; then
     if [ "$PROJECT" != "node-wizard" ]; then
         case "$ARCH" in
-            arm64)  DOWNLOAD="macOS-arm64" ;;
-            x86_64) DOWNLOAD="macOS-amd64" ;;
-            *) echo "Unsupported macOS architecture: $ARCH"; exit 1 ;;
+            arm64)  DOWNLOAD="mac-arm64" ;;
+            x86_64) DOWNLOAD="mac-amd64" ;;
+            *) echo "Unsupported mac architecture: $ARCH"; exit 1 ;;
         esac
     else
         echo "Darwin is only supported when software is client"
@@ -88,6 +88,7 @@ elif [ "$OS" = "Linux" ]; then
                 20.*) DOWNLOAD="ubuntu20" ;;
                 22.*) DOWNLOAD="ubuntu22" ;;
                 24.*) DOWNLOAD="ubuntu24" ;;
+                26.*) DOWNLOAD="ubuntu26" ;;
                 *) echo "Unsupported Ubuntu version: $VERSION_ID"; exit 1 ;;
             esac
         elif [ "$ID" = "rocky" ] && [[ "$VERSION_ID" =~ ^9 ]]; then
@@ -110,7 +111,13 @@ else
 fi
 
 if [ -z "$PROJECT_VERSION" ]; then
-    PROJECT_VERSION="latest"
+  if [ "$PROJECT" = "node-wizard" ]; then
+    PROJECT_VERSION="0.6.0"
+  elif [ "$PROJECT" = "node-client" ]; then
+    PROJECT_VERSION="0.6.0"
+  else
+    PROJECT_VERSION="0.6.0"
+  fi
 fi
 
 
@@ -130,17 +137,13 @@ fi
 
 file=""
 if [ "$PROJECT" != "node-wizard" ]; then
-  file="https://gitlab.com/cluster-wizard/release/-/wikis/License/Node-Wizard/AUTHORIZED-CLIENT-USER-TERMS-OF-USE-(CLIENT)"
+  file="https://download.cluster-wizard.com/client-license"
 else
-  file="https://gitlab.com/cluster-wizard/release/-/wikis/License/Node-Wizard/Software-License-Agreement"
+  file="https://download.cluster-wizard.com/node-wizard-license"
 fi
 
-if [[ $DOWNLOAD == *mac* ]]; then
-  curl -s $file | grep -oE 'content&quot;:&quot;[^"]*?&quot;,' | sed 's/^content&quot;:&quot;//; s/&quot;,$//' | sed 's/\\r\\n/\n/g; s/\\"/"/g; s/&quot;/"/g; s/&#39;/'"'"'/g; s/\\u0026emsp;/ /g' | sed 's/\\"/"/g;' 
-else
-  curl -s $file | grep -Po 'content&quot;:&quot;\K.*?(?=&quot;,)' -o   | sed 's/\\r\\n/\n/g; s/\\"/"/g; s/&quot;/"/g; s/&#39;/'"'"'/g; s/\\u0026emsp;/ /g' | sed 's/\\"/"/g;' 
+curl -s $file
 
-fi
 
 echo "Do you accept the license? (y/n)"
 read -r answer
@@ -153,22 +156,7 @@ else
     exit 3
 fi
 
-URL="https://cluster-wizard.gitlab.io/release/download/node/latest"
-
-HTML=$(curl -s "$URL")
-
-JSFILE=$(echo "$HTML" | grep -o 'src="[^"]*index[^"]*\.js"' | cut -d'"' -f2)
-
-BASE="https://cluster-wizard.gitlab.io"
-JSURL=$(echo "$BASE/$JSFILE")
-
-
-DOWNLOADJS=$(curl -s "$JSURL" | grep -oE 'Download-[^"]+\.js' | head -n1)
-
-TOKEN=$(curl -s https://cluster-wizard.gitlab.io/release/assets/$DOWNLOADJS | grep -oE 'glpat-[^"]*')
-
-curl -f -H "PRIVATE-TOKEN: $TOKEN" "https://gitlab.com/api/v4/projects/57050576/packages/generic/$PROJECT/$PROJECT_VERSION/$PROJECT-$PROJECT_VERSION-$DOWNLOAD.tgz" -s -o "/tmp/$PROJECT.tgz" || { echo "Package not found, please verify version and os"; exit 4; }
-
+curl -f "https://download.cluster-wizard.com/files/$PROJECT/$PROJECT_VERSION/$PROJECT-$PROJECT_VERSION-$DOWNLOAD.tgz" -s -o "/tmp/$PROJECT.tgz" || { echo "Package not found, please verify version and os"; exit 4; }
 
 if [ "$PROJECT" = "wizard-client" ]; then
   tar -xf "/tmp/$PROJECT.tgz" -C /tmp
