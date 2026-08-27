@@ -145,7 +145,7 @@ docker compose ps
 NAME                      IMAGE                                          COMMAND                  SERVICE          CREATED              STATUS                        PORTS
 cluster-wizard            clusterwizard/cluster-wizard:0.6.0        "/bin/sh -c 'set -e;…"   cluster-wizard   About a minute ago   Up 52 seconds (healthy)       0.0.0.0:50051->50001/tcp, [::]:50051->50001/tcp
 cluster-wizard-postgres   postgres:17.5                                  "docker-entrypoint.s…"   postgres         About a minute ago   Up About a minute (healthy)   5432/tcp
-wizard-client-webui       clusterwizard/wizard-client-webui:0.6.0   "/bin/sh -c 'set -e;…"   wizard-client    About a minute ago   Up 41 seconds                 0.0.0.0:23051->23051/tcp, [::]:23051->23051/tcp, 0.0.0.0:25080->25080/tcp, [::]:25080->25080/tcp
+wizard-client-webui       clusterwizard/wizard-client-webui:0.6.0   "/bin/sh -c 'set -e;…"   wizard-client    About a minute ago   Up 41 seconds                 0.0.0.0:25080->25080/tcp, [::]:25080->25080/tcp
 ```
 
 
