@@ -112,11 +112,11 @@ fi
 
 if [ -z "$PROJECT_VERSION" ]; then
   if [ "$PROJECT" = "node-wizard" ]; then
-    PROJECT_VERSION="0.6.0"
+    PROJECT_VERSION="0.6.1"
   elif [ "$PROJECT" = "node-client" ]; then
     PROJECT_VERSION="0.6.0"
   else
-    PROJECT_VERSION="0.6.0"
+    PROJECT_VERSION="0.6.1"
   fi
 fi
 

@@ -46,7 +46,7 @@ services:
       fi'
 
   cluster-wizard:
-    image: clusterwizard/cluster-wizard:0.6.0
+    image: clusterwizard/cluster-wizard:0.6.1
     depends_on:
       postgres:
         condition: service_healthy
@@ -108,7 +108,7 @@ services:
     command: []
 
   wizard-client:
-    image: clusterwizard/wizard-client-webui:0.6.0
+    image: clusterwizard/wizard-client-webui:0.6.1
     depends_on:
       cluster-wizard:
         condition: service_healthy
